@@ -29,6 +29,39 @@ rule token = parse
   | "//" [^ '\n']* "\n"  { new_line lexbuf; token lexbuf }
   | "/*"                 { comment lexbuf; token lexbuf }
 
+  | "-" { MINUS }
+  | "!" { EXCLA }
+  | "+" { PLUS }
+  | "*" { STAR }
+  | "/" { SLASH }
+  | "%" { PERCENT }
+  | "=" { EQUAL }
+  | "<" { LESS }
+  | ">" { MORE }
+  | "&" { AND }
+  | "|" { VBAR }
+
+  | "int" { TYP_INT }
+  | "bool" { TYP_BOOL }
+  | "void" { TYP_VOID }
+
+  | "var" { VAR }
+  | "attribute" { ATTRIBUTE }
+  | "class" { CLASS }
+  | "method" { METHOD }
+
+  | "true" { TRUE }
+  | "false" { FALSE }
+
+  | "this" { FALSE }
+  | "new" { FALSE }
+
+  | "print" { PRINT }
+  | "if" { PRINT }
+  | "else" { PRINT }
+  | "while" { WHILE }
+  | "return" { RETURN }
+
   | number as n  { INT(int_of_string n) }
   | ident as id  { keyword_or_ident id }
 
@@ -37,6 +70,7 @@ rule token = parse
   | ")"  { RPAR }
   | "{"  { BEGIN }
   | "}"  { END }
+  | "."  { DOT }
 
   | _    { raise (Error ("unknown character : " ^ lexeme lexbuf)) }
   | eof  { EOF }
