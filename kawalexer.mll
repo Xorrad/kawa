@@ -49,6 +49,7 @@ rule token = parse
   | "attribute" { ATTRIBUTE }
   | "class" { CLASS }
   | "method" { METHOD }
+  | "extends" { EXTENDS }
 
   | "true" { TRUE }
   | "false" { FALSE }

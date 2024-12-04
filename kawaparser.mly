@@ -13,28 +13,10 @@
 %token EOF
 
 %token MINUS EXCLA PLUS STAR SLASH PERCENT EQUAL LESS MORE AND VBAR
-
-%token TYP_INT
-%token TYP_BOOL
-%token TYP_VOID
-
-%token VAR
-%token ATTRIBUTE
-%token CLASS
-%token METHOD
-
-%token TRUE
-%token FALSE
-%token THIS
-%token NEW
-
-%token IF
-%token ELSE
-%token WHILE
-%token RETURN
-
-// %token VAR
-// %token ATTRIBUTE
+%token TYP_INT TYP_BOOL TYP_VOID
+%token VAR ATTRIBUTE CLASS METHOD EXTENDS
+%token TRUE FALSE THIS NEW
+%token IF ELSE WHILE RETURN
 
 %start program
 %type <Kawa.program> program
@@ -47,8 +29,13 @@ program:
 ;
 
 class_def:
-| CLASS id=IDENT BEGIN attr=list(attr_decl) meth=list(meth_def) END
-    { {class_name=id; attributes=attr; methods=meth} }
+| CLASS id=IDENT parent=opt_extends BEGIN attr=list(attr_decl) meth=list(meth_def) END
+    { {class_name=id; attributes=attr; methods=meth; parent=parent} }
+;
+
+opt_extends:
+| /* empty */ { None }
+| EXTENDS parent_id=IDENT { Some parent_id }
 ;
 
 typed_ident:
