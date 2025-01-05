@@ -104,7 +104,7 @@ type class_def = {
 (* Programme complet : variables globales, classes, et une séquence 
    d'instructions *)
 type program = {
-  classes: class_def list;
   globals: (string * typ) list;
+  classes: class_def list;
   main: seq;
 }
