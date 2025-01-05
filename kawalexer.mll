@@ -11,7 +11,7 @@
       [
         "main", MAIN;
         "true", BOOL(true);
-        "false", BOOL(true);
+        "false", BOOL(false);
         "var", VAR;
         "attribute", ATTRIBUTE;
         "method", METHOD;
