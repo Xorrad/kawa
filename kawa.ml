@@ -11,15 +11,29 @@ type typ =
   | TClass of string
 
 let typ_to_string = function
-  | TVoid    -> "void"
-  | TInt     -> "int"
-  | TBool    -> "bool"
+  | TVoid -> "void"
+  | TInt -> "int"
+  | TBool -> "bool"
   | TClass c -> c
 
-type unop  = Opp | Not
-type binop = Add | Sub | Mul | Div | Rem
-           | Lt  | Le  | Gt | Ge | Eq  | Neq
-           | And | Or
+type unop =
+  | Opp
+  | Not
+
+type binop =
+  | Add
+  | Sub
+  | Mul
+  | Div
+  | Rem
+  | Lt
+  | Le
+  | Gt
+  | Ge
+  | Eq
+  | Neq
+  | And
+  | Or
 
 (* Expressions *)
 type expr =
@@ -65,12 +79,12 @@ and seq = instr list
 
    Le corps de la méthode est similaire au corps d'une fonction. *)
 type method_def = {
-    method_name: string;
-    code: seq;
-    params: (string * typ) list;
-    locals: (string * typ) list;
-    return: typ;
-  }
+  method_name: string;
+  code: seq;
+  params: (string * typ) list;
+  locals: (string * typ) list;
+  return: typ;
+}
         
 (* Définition de classe 
 
@@ -81,16 +95,16 @@ type method_def = {
    "constructor" et de type de retour void, qui initialise les champs du 
    paramètre implicite this. *)
 type class_def = {
-    class_name: string;
-    attributes: (string * typ) list;
-    methods: method_def list;
-    parent: string option;
-  }
+  class_name: string;
+  attributes: (string * typ) list;
+  methods: method_def list;
+  parent: string option;
+}
 
 (* Programme complet : variables globales, classes, et une séquence 
    d'instructions *)
 type program = {
-    classes: class_def list;
-    globals: (string * typ) list;
-    main: seq;
-  }
+  classes: class_def list;
+  globals: (string * typ) list;
+  main: seq;
+}
