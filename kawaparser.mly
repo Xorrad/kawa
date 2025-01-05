@@ -26,14 +26,15 @@
 %token ASSIGN
 %token <string> IDENT
 %token EOF
+%token UOP
 
 // Priorités des tokens
 %left OR
 %left AND
 %nonassoc LT LE GT GE EQ NEQ
-%right NOT
 %left ADD SUB
 %left MUL DIV MOD
+%nonassoc UOP
 %left DOT
 
 %start program
@@ -85,7 +86,8 @@ expression:
 | b=BOOL { Bool(b) }
 | THIS { This }
 | m=mem { Get(m) }
-| op=uop e=expression { Unop(op, e) }
+| op=uop e=expression %prec UOP { Unop(op, e) }
+// | op=uop e=expression { Unop(op, e) }
 | e1=expression op=bop e2=expression { Binop(op, e1, e2) }
 | LPAR e=expression RPAR { e }
 | NEW id=IDENT { New(id) }
