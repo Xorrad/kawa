@@ -2,7 +2,7 @@
  (modules kawalexer))
 (menhir
  (modules kawaparser)
- (flags --explain --dump)
+ (flags --explain --trace --dump)
  (infer true))
 (executable
  (name kawai)
