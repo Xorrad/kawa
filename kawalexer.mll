@@ -6,15 +6,31 @@
   exception Error of string
 
   let keyword_or_ident =
-  let h = Hashtbl.create 17 in
-  List.iter (fun (s, k) -> Hashtbl.add h s k)
-    [ "print",    PRINT;
-      "main",     MAIN;
-    ] ;
-  fun s ->
-    try  Hashtbl.find h s
-    with Not_found -> IDENT(s)
-        
+    let h = Hashtbl.create 18 in
+    List.iter (fun (s, k) -> Hashtbl.add h s k)
+      [
+        "main", MAIN;
+        "true", BOOL(true);
+        "false", BOOL(true);
+        "var", VAR;
+        "attribute", ATTRIBUTE;
+        "method", METHOD;
+        "class", CLASS;
+        "new",  NEW;
+        "this", THIS;
+        "if", IF;
+        "else", ELSE;
+        "while", WHILE;
+        "return", RETURN;
+        "print", PRINT;
+        "int", TINT;
+        "bool", TBOOL;
+        "void", TVOID;
+        "extends", EXTENDS;
+      ] ;
+    fun s ->
+      try  Hashtbl.find h s
+      with Not_found -> IDENT(s)
 }
 
 let digit = ['0'-'9']
@@ -29,49 +45,31 @@ rule token = parse
   | "//" [^ '\n']* "\n"  { new_line lexbuf; token lexbuf }
   | "/*"                 { comment lexbuf; token lexbuf }
 
-  | "-" { MINUS }
-  | "!" { EXCLA }
-  | "+" { PLUS }
-  | "*" { STAR }
-  | "/" { SLASH }
-  | "%" { PERCENT }
-  | "=" { EQUAL }
-  | "<" { LESS }
-  | ">" { MORE }
-  | "&" { AND }
-  | "|" { VBAR }
-
-  | "int" { TYP_INT }
-  | "bool" { TYP_BOOL }
-  | "void" { TYP_VOID }
-
-  | "var" { VAR }
-  | "attribute" { ATTRIBUTE }
-  | "class" { CLASS }
-  | "method" { METHOD }
-  | "extends" { EXTENDS }
-
-  | "true" { TRUE }
-  | "false" { FALSE }
-
-  | "this" { FALSE }
-  | "new" { FALSE }
-
-  | "print" { PRINT }
-  | "if" { PRINT }
-  | "else" { PRINT }
-  | "while" { WHILE }
-  | "return" { RETURN }
-
-  | number as n  { INT(int_of_string n) }
-  | ident as id  { keyword_or_ident id }
-
-  | ";"  { SEMI }
+  | "=" { ASSIGN }
+  | "-" { SUB }
+  | "!" { NOT }
+  | "+" { ADD }
+  | "*" { MUL }
+  | "/" { DIV }
+  | "%" { MOD }
+  | "==" { EQ }
+  | "!=" { NEQ }
+  | "<" { LT }
+  | "<=" { LE }
+  | ">" { GT }
+  | ">=" { GE }
+  | "&&" { AND }
+  | "||" { OR }
   | "("  { LPAR }
   | ")"  { RPAR }
   | "{"  { BEGIN }
   | "}"  { END }
+  | ";"  { SEMI }
   | "."  { DOT }
+  | ","  { COMMA }
+
+  | number as n  { INT(int_of_string n) }
+  | ident as id  { keyword_or_ident id }
 
   | _    { raise (Error ("unknown character : " ^ lexeme lexbuf)) }
   | eof  { EOF }
