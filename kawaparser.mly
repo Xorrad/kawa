@@ -5,18 +5,36 @@
 
 %}
 
+// Mots-clefs réservés
+%token MAIN VAR ATTRIBUTE METHOD CLASS NEW THIS IF ELSE WHILE RETURN PRINT EXTENDS
+
+// Arithmétique
+%token SUB ADD MUL DIV MOD
+
+// Arithmétique booléenne
+%token NOT EQ NEQ LT LE GT GE AND OR
+
+// Symboles
+%token LPAR RPAR BEGIN END SEMI DOT COMMA
+
+// Types
 %token <int> INT
+%token <bool> BOOL
+%token TINT TBOOL TVOID
+
+// Extra
+%token ASSIGN
 %token <string> IDENT
-%token MAIN
-%token LPAR RPAR BEGIN END SEMI DOT
-%token PRINT
 %token EOF
 
-%token MINUS EXCLA PLUS STAR SLASH PERCENT EQUAL LESS MORE AND VBAR
-%token TYP_INT TYP_BOOL TYP_VOID
-%token VAR ATTRIBUTE CLASS METHOD EXTENDS
-%token TRUE FALSE THIS NEW
-%token IF ELSE WHILE RETURN
+// Priorités des tokens
+%left OR
+%left AND
+%nonassoc LT LE GT GE EQ NEQ
+%right NOT
+%left ADD SUB
+%left MUL DIV MOD
+%left DOT
 
 %start program
 %type <Kawa.program> program
@@ -24,8 +42,8 @@
 %%
 
 program:
-| MAIN BEGIN main=list(instruction) END EOF
-    { {classes=[]; globals=[]; main} }
+| globals=list(var_decl) classes=list(class_def) MAIN BEGIN main=list(instruction) END EOF
+    { {globals=globals; classes=classes; main} }
 ;
 
 class_def:
@@ -35,45 +53,44 @@ class_def:
 
 opt_extends:
 | /* empty */ { None }
-| EXTENDS parent_id=IDENT { Some parent_id }
+| EXTENDS parent=IDENT { Some parent }
 ;
 
 typed_ident:
-| t=typ id=IDENT {id, t}
+| t=typ id=IDENT { id, t }
 ;
 
 var_decl:
-| VAR tid=typed_ident SEMI {tid}
+| VAR id=typed_ident SEMI { id }
 ;
 
 attr_decl:
-| ATTRIBUTE tid=typed_ident SEMI {tid}
+| ATTRIBUTE id=typed_ident SEMI { id }
 ;
 
 typ:
-| TYP_INT { TInt }
-| TYP_BOOL { TBool }
+| TINT { TInt }
+| TBOOL { TBool }
 | id=IDENT { TClass(id) }
-| TYP_VOID { TVoid }
+| TVOID { TVoid }
 ;
 
 meth_def:
-| METHOD t=typ id=IDENT LPAR args=list(typed_ident) RPAR BEGIN var=list(var_decl) instr=list(instruction) END
+| METHOD t=typ id=IDENT LPAR args=separated_list(COMMA, typed_ident) RPAR BEGIN var=list(var_decl) instr=list(instruction) END
     { {method_name=id; code=instr; params=args; locals=var; return=t} }
 ;
 
 expression:
 | n=INT { Int(n) }
-| TRUE { Bool(true) }
-| FALSE { Bool(false) }
+| b=BOOL { Bool(b) }
 | THIS { This }
 | m=mem { Get(m) }
 | op=uop e=expression { Unop(op, e) }
 | e1=expression op=bop e2=expression { Binop(op, e1, e2) }
 | LPAR e=expression RPAR { e }
 | NEW id=IDENT { New(id) }
-| NEW id=IDENT LPAR args=list(expression) RPAR { NewCstr(id, args) }
-| e=expression DOT id=IDENT LPAR expr=list(expression) RPAR { MethCall(e, id, expr) }
+| NEW id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { NewCstr(id, args) }
+| e=expression DOT id=IDENT LPAR expr=separated_list(COMMA, expression) RPAR { MethCall(e, id, expr) }
 ;
 
 mem:
@@ -83,7 +100,7 @@ mem:
 
 instruction:
 | PRINT LPAR e=expression RPAR SEMI { Print(e) }
-| m=mem EQUAL e=expression SEMI { Set(m, e) }
+| m=mem ASSIGN e=expression SEMI { Set(m, e) }
 | IF LPAR e1=expression RPAR BEGIN i1=list(instruction) END ELSE BEGIN i2=list(instruction) END
     { If(e1, i1, i2) }
 | WHILE LPAR e=expression RPAR BEGIN i=list(instruction) END
@@ -93,22 +110,22 @@ instruction:
 ;
 
 uop:
-| MINUS { Opp } 
-| EXCLA { Not }
+| SUB { Opp } 
+| NOT { Not }
 ;
 
-bop:
-| PLUS { Add }
-| MINUS { Sub }
-| STAR { Mul }
-| SLASH { Div }
-| PERCENT { Rem }
-| LESS { Lt }
-| LESS EQUAL { Le }
-| MORE { Gt }
-| MORE EQUAL { Ge }
-| EQUAL EQUAL { Eq }
-| EXCLA EQUAL { Neq }
-| AND AND { And }
-| VBAR VBAR { Or }
+%inline bop:
+| ADD { Add }
+| SUB { Sub }
+| MUL { Mul }
+| DIV { Div }
+| MOD { Rem }
+| EQ { Eq }
+| NEQ { Neq }
+| LT { Lt }
+| LE { Le }
+| GT { Gt }
+| GE { Ge }
+| AND { And }
+| OR { Or }
 ;
