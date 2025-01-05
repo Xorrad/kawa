@@ -5,16 +5,16 @@
 
 %}
 
-// Mots-clefs réservés
+// Reserved keywords
 %token MAIN VAR ATTRIBUTE METHOD CLASS NEW THIS IF ELSE WHILE RETURN PRINT EXTENDS
 
-// Arithmétique
+// Arithmetic operators
 %token SUB ADD MUL DIV MOD
 
-// Arithmétique booléenne
+// Boolean arithmetic operators
 %token NOT EQ NEQ LT LE GT GE AND OR
 
-// Symboles
+// Symbols
 %token LPAR RPAR BEGIN END SEMI DOT COMMA
 
 // Types
@@ -22,13 +22,13 @@
 %token <bool> BOOL
 %token TINT TBOOL TVOID
 
-// Extra
+// Miscallaneous
 %token ASSIGN
 %token <string> IDENT
 %token EOF
 %token UOP
 
-// Priorités des tokens
+// Tokens' priority
 %left OR
 %left AND
 %nonassoc LT LE GT GE EQ NEQ
@@ -87,7 +87,6 @@ expression:
 | THIS { This }
 | m=mem { Get(m) }
 | op=uop e=expression %prec UOP { Unop(op, e) }
-// | op=uop e=expression { Unop(op, e) }
 | e1=expression op=bop e2=expression { Binop(op, e1, e2) }
 | LPAR e=expression RPAR { e }
 | NEW id=IDENT { New(id) }
