@@ -21,6 +21,55 @@ let typecheck_prog p =
 
   and type_expr e tenv = match e with
     | Int _  -> TInt
+    | Bool _  -> TBool
+    
+    | Unop(Opp, e1) ->
+      check e1 TInt tenv;
+      TInt
+    | Unop(Not, e1) ->
+      check e1 TBool tenv;
+      TBool
+
+    | Binop((Add | Sub | Mul | Div | Rem), e1, e2) ->
+      check e1 TInt tenv;
+      check e2 TInt tenv;
+      TInt
+    | Binop((Lt | Le | Gt | Ge), e1, e2) ->
+      check e1 TInt tenv;
+      check e2 TInt tenv;
+      TBool
+    | Binop((Eq | Neq), e1, e2) ->
+      check e2 (type_expr e tenv) tenv;
+      TBool
+    | Binop((And | Or), e1, e2) ->
+      check e1 TBool tenv;
+      check e2 TBool tenv;
+      TBool
+    
+    | Get mem -> type_mem_access mem tenv
+    | This -> type_mem_access (Var "this") tenv
+
+    | New s ->
+      let exists = List.exists (fun c -> c.class_name = s) p.classes in
+      if not exists then error (Printf.sprintf "undefined class %s" s);
+      TClass s
+    | NewCstr(s, args) ->
+      begin 
+        match List.find_opt (fun c -> c.class_name = s) p.classes with
+          | Some c ->
+            begin
+              match List.find_opt (fun m -> m.method_name = s) c.methods with
+                | Some m -> List.iter2 (fun (s, t) e -> check e t tenv) m.params args
+                | None -> error (Printf.sprintf "undefined constructor for class %s" s);
+            end
+          | None -> error (Printf.sprintf "undefined class %s" s);
+      end;
+      TClass s
+    (* | MethCall(e, s, args) ->
+      begin *)
+        
+
+
     | _ -> failwith "case not implemented in type_expr"
 
   and type_mem_access m tenv = match m with
