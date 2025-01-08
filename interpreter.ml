@@ -55,10 +55,10 @@ let exec_prog (p: program): unit =
       | Get mem ->
         begin
           match mem with
-            | Var s -> (Hashtbl.find lenv s)
-            | Field(e, s) ->
-              let obj = evalo e in
-              (Hashtbl.find obj.fields s)
+          | Var s -> (Hashtbl.find lenv s)
+          | Field(e, s) ->
+            let obj = evalo e in
+            (Hashtbl.find obj.fields s)
         end
       | This -> (Hashtbl.find lenv "this")
 
@@ -76,7 +76,22 @@ let exec_prog (p: program): unit =
               let obj = evalo e in
               (Hashtbl.add obj.fields s v)
         end
+      | If(pred, seq1, seq2) ->
+        if evalb pred then exec_seq seq1
+        else exec_seq seq2
+      | While(pred, seq1) ->
+        let rec exec_while pred seq1 =
+          if evalb pred then begin
+            exec_seq seq1;
+            exec_while pred seq1
+          end
+        in exec_while pred seq1
+      | Return e ->
+        raise (Return (eval e))
+      | Expr e ->
+        let _ = eval e in ()
       | _ -> failwith "case not implemented in exec"
+
     and exec_seq s = 
       List.iter exec s
     in
