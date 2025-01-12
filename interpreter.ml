@@ -18,6 +18,8 @@ let exec_prog (p: program): unit =
   List.iter (fun (x, _) -> Hashtbl.add env x Null) p.globals;
   
   let rec eval_call f this args =
+    
+
     failwith "eval_call not implemented"
 
   and exec_seq s lenv =
@@ -62,6 +64,28 @@ let exec_prog (p: program): unit =
         end
       | This -> (Hashtbl.find lenv "this")
 
+      | New s ->
+        begin
+          match List.find_opt (fun c -> c.class_name = s) p.classes with
+          | Some c ->
+            let class_env =
+              match c.parent with
+              | Some x -> (evalo (New x)).fields
+              | None -> Hashtbl.create (List.length c.attributes)
+            in
+            List.iter (fun (a, v) -> Hashtbl.add class_env a Null) c.attributes;
+            VObj { cls = s; fields = class_env }
+          | None -> failwith (Printf.sprintf "undefined class %s" s);
+        end
+      | NewCstr(s, args) ->
+        let obj = evalo (New s) in
+        let args = List.rev (List.fold_left (fun r e -> eval e :: r) [] args) in
+        let _ = eval_call s obj args lenv in
+        VObj obj
+      | MethCall(e, s, args) ->
+        let args = List.rev (List.fold_left (fun r e -> eval e :: r) [] args) in
+        eval_call s (evalo e) args lenv
+
       | _ -> failwith "case not implemented in eval"
     in
   
@@ -90,6 +114,7 @@ let exec_prog (p: program): unit =
         raise (Return (eval e))
       | Expr e ->
         let _ = eval e in ()
+        
       | _ -> failwith "case not implemented in exec"
 
     and exec_seq s = 
