@@ -100,7 +100,7 @@ let exec_prog (p: program): unit =
       | NewCstr(s, args) ->
         let obj = evalo (New s) in
         let args = List.rev (List.fold_left (fun r e -> eval e :: r) [] args) in
-        let _ = eval_call s obj args in
+        let _ = eval_call "constructor" obj args in
         VObj obj
       | MethCall(e, s, args) ->
         let args = List.rev (List.fold_left (fun r e -> eval e :: r) [] args) in
