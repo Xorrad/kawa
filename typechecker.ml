@@ -122,7 +122,14 @@ let typecheck_prog p =
         | TClass s1, TClass s2 -> check_subclass s1 s2
         | t1, t2 -> if t1 <> t2 then type_error t1 t2
       end
-
+    | If(pred, seq1, seq2) ->
+      check pred TBool tenv;
+      check_seq seq1 ret tenv;
+      check_seq seq2 ret tenv
+    | While(pred, seq1) ->
+      check pred TBool tenv;
+      check_seq seq1 ret tenv
+    | Return(e) -> ()
     | Expr e -> check e TVoid tenv
 
     | _ -> failwith "case not implemented in check_instr"
