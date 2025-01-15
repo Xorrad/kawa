@@ -6,7 +6,7 @@
 %}
 
 // Reserved keywords
-%token MAIN VAR ATTRIBUTE METHOD CLASS NEW THIS IF ELSE WHILE RETURN PRINT EXTENDS
+%token MAIN VAR ATTRIBUTE METHOD CLASS NEW THIS IF ELSE WHILE RETURN PRINT EXTENDS FINAL
 
 // Arithmetic operators
 %token SUB ADD MUL DIV MOD
@@ -58,15 +58,15 @@ opt_extends:
 ;
 
 typed_ident:
-| t=typ id=IDENT { id, t }
+| final=opt_final t=typ id=IDENT { {variable_name=id; variable_type=t; variable_value=None; variable_final=final} }
 ;
 
 var_decl:
-| VAR id=typed_ident SEMI { id }
+| final=opt_final VAR t=typ id=IDENT SEMI { {variable_name=id; variable_type=t; variable_value=None; variable_final=final} }
 ;
 
 attr_decl:
-| ATTRIBUTE id=typed_ident SEMI { id }
+| final=opt_final ATTRIBUTE t=typ id=IDENT SEMI { {variable_name=id; variable_type=t; variable_value=None; variable_final=final} }
 ;
 
 typ:
@@ -75,6 +75,10 @@ typ:
 | id=IDENT { TClass(id) }
 | TVOID { TVoid }
 ;
+
+opt_final:
+| /* empty */ { false }
+| FINAL { true }
 
 meth_def:
 | METHOD t=typ id=IDENT LPAR args=separated_list(COMMA, typed_ident) RPAR BEGIN var=list(var_decl) instr=list(instruction) END

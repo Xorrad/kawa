@@ -1,0 +1,12 @@
+final var point a;
+
+class point {
+  final attribute int x;
+}
+
+main {
+  a = new point;
+  a.x = 1;
+  a.x = 4;
+  //failure: final field x in class point cannot be modified
+}

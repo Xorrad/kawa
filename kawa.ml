@@ -73,6 +73,18 @@ type instr =
 
 and seq = instr list
 
+(* Définition d'une variable/attribut 
+
+   Syntaxe : [final] var <nom>;
+        ou : [final] attribute <nom>;
+*)
+type variable_def = {
+  variable_name: string;
+  variable_type: typ;
+  variable_value: expr option;
+  variable_final: bool;
+}
+
 (* Définition de méthode 
 
    Syntaxe : method <type de retour> <nom> (<params>) { ... }
@@ -81,8 +93,8 @@ and seq = instr list
 type method_def = {
   method_name: string;
   code: seq;
-  params: (string * typ) list;
-  locals: (string * typ) list;
+  params: variable_def list;
+  locals: variable_def list;
   return: typ;
 }
         
@@ -96,7 +108,7 @@ type method_def = {
    paramètre implicite this. *)
 type class_def = {
   class_name: string;
-  attributes: (string * typ) list;
+  attributes: variable_def list;
   methods: method_def list;
   parent: string option;
 }
@@ -104,7 +116,7 @@ type class_def = {
 (* Programme complet : variables globales, classes, et une séquence 
    d'instructions *)
 type program = {
-  globals: (string * typ) list;
+  globals: variable_def list;
   classes: class_def list;
   main: seq;
 }

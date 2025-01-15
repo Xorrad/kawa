@@ -27,6 +27,8 @@
         "bool", TBOOL;
         "void", TVOID;
         "extends", EXTENDS;
+
+        "final", FINAL;
       ] ;
     fun s ->
       try  Hashtbl.find h s
