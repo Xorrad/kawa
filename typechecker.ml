@@ -46,7 +46,7 @@ let typecheck_prog p =
       check e1 TInt tenv;
       check e2 TInt tenv;
       TBool
-    | Binop((Eq | Neq), e1, e2) ->
+    | Binop((Eq | Neq | Seq | Sneq), e1, e2) ->
       check e1 (type_expr e2 tenv) tenv;
       TBool
     | Binop((And | Or), e1, e2) ->
@@ -134,7 +134,10 @@ let typecheck_prog p =
   in
 
   let rec check_instr i ret tenv = match i with
-    | Print e -> check e TInt tenv
+    | Print e ->
+      let t = type_expr e tenv in
+      if t <> TInt && t <> TBool then
+        error (Printf.sprintf "expected %s or %s, got %s" (typ_to_string TInt) (typ_to_string TBool) (typ_to_string t))
     | Set(mem, e) ->
       begin
         let t1 = type_mem_access mem tenv in

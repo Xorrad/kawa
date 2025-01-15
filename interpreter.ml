@@ -63,7 +63,22 @@ let exec_prog (p: program): unit =
     and evalo e = match eval e with
       | VObj o -> o
       | _ -> assert false
-        
+    and struct_equality e1 e2 = match (eval e1, eval e2) with
+      | VInt n1, VInt n2 -> n1 = n2
+      | VBool b1, VBool b2 -> b1 = b2
+      | VObj o1, VObj o2 ->
+        if o1.cls = o2.cls then
+          let exception NotEqual in
+          try
+            Hashtbl.iter (fun s1 v1 ->
+              let v2 = (Hashtbl.find o2.fields s1) in 
+              if v1.value <> v2.value then raise NotEqual
+            ) o1.fields;
+            true
+          with NotEqual -> false
+        else false
+      | _ -> failwith "invalid structural equality operation"
+
     and eval (e: expr): value = match e with
       | Int n  -> VInt n
       | Bool b  -> VBool b
@@ -80,10 +95,12 @@ let exec_prog (p: program): unit =
       | Binop(Le, e1, e2) -> VBool (evali e1 <= evali e2)
       | Binop(Gt, e1, e2) -> VBool (evali e1 > evali e2)
       | Binop(Ge, e1, e2) -> VBool (evali e1 >= evali e2)
-      | Binop(Eq, e1, e2) -> VBool (evali e1 == evali e2)
-      | Binop(Neq, e1, e2) -> VBool (evali e1 != evali e2)
+      | Binop(Eq, e1, e2) -> VBool (evali e1 = evali e2)
+      | Binop(Neq, e1, e2) -> VBool (evali e1 <> evali e2)
       | Binop(And, e1, e2) -> VBool (evalb e1 && evalb e2)
       | Binop(Or, e1, e2) -> VBool (evalb e1 || evalb e2)
+      | Binop(Seq, e1, e2) -> VBool (struct_equality e1 e2)
+      | Binop(Sneq, e1, e2) -> VBool (not (struct_equality e1 e2))
 
       | Get mem ->
         begin
@@ -121,7 +138,13 @@ let exec_prog (p: program): unit =
     in
   
     let rec exec (i: instr): unit = match i with
-      | Print e -> Printf.printf "%d\n" (evali e)
+      | Print e ->
+        begin
+          match eval e with
+          | VInt n -> Printf.printf "%d\n" n
+          | VBool b -> Printf.printf "%b\n" b
+          | _ -> failwith "invalid type when calling print"
+        end
       | Set(mem, e) ->
         let v = eval e in
         begin

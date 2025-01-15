@@ -69,6 +69,9 @@ rule token = parse
   | ";"  { SEMI }
   | "."  { DOT }
   | ","  { COMMA }
+  
+  | "==="  { SEQ }
+  | "=/="  { SNEQ }
 
   | number as n  { INT(int_of_string n) }
   | ident as id  { keyword_or_ident id }

@@ -12,7 +12,7 @@
 %token SUB ADD MUL DIV MOD
 
 // Boolean arithmetic operators
-%token NOT EQ NEQ LT LE GT GE AND OR
+%token NOT EQ NEQ LT LE GT GE AND OR SEQ SNEQ
 
 // Symbols
 %token LPAR RPAR BEGIN END SEMI DOT COMMA
@@ -31,7 +31,7 @@
 // Tokens' priority
 %left OR
 %left AND
-%nonassoc LT LE GT GE EQ NEQ
+%nonassoc LT LE GT GE EQ NEQ SEQ SNEQ
 %left ADD SUB
 %left MUL DIV MOD
 %nonassoc UOP
@@ -133,4 +133,7 @@ uop:
 | GE { Ge }
 | AND { And }
 | OR { Or }
+
+| SEQ { Seq }
+| SNEQ { Sneq }
 ;
