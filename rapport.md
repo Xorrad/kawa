@@ -44,6 +44,17 @@ var int x = 1, y = 2;
 
 ### Test de type
 Ajout d'un opérateur binaire **instanceof** testant le type dynamique d'un objet.
+```
+if(i instanceof int) {
+    ...
+}
+if(obj instanceof parent_class) {
+    ...
+}
+if(obj instanceof child_class) {
+    ...
+}
+```
 
 ### Chaînes de caractères
 Ajout d'un type `string` pour représenter et afficher des chaines de caractères.  
@@ -64,3 +75,5 @@ La principale difficulté rencontrée était de se régler les conflits lors de 
 Puis j'ai également perdu un certain temps à déterminer la porté des différents environnements, ainsi que la distribution des  attributs et méthodes pour les classes héritants d'une autre.  
 
 Enfin, comme la plupart du temps, j'ai avancé trop lentement dans le développement et je n'ai pas eu le temps d'implémenter toutes les fonctionnalités que j'aurai souhaite ajouté.
+
+En premier lieu, j'ai implémenté le lexer et parseur pour toutes les fonctionnalités principales simultanément, donc colonne par colonne. J'ai ensuite continué ligne par ligne pour être capable de tester en direct les changements et vérifier le bon fonctionnement du code.
