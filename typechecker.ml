@@ -30,6 +30,7 @@ let typecheck_prog p =
   and type_expr e tenv = match e with
     | Int _  -> TInt
     | Bool _  -> TBool
+    | String _  -> TString
     
     | Unop(Opp, e1) ->
       check e1 TInt tenv;
@@ -38,7 +39,13 @@ let typecheck_prog p =
       check e1 TBool tenv;
       TBool
 
-    | Binop((Add | Sub | Mul | Div | Rem), e1, e2) ->
+    | Binop(Add, e1, e2) ->
+      let t1 = type_expr e1 tenv in
+      let t2 = type_expr e2 tenv in
+      if t1 <> TInt && t1 <> TString then error (Printf.sprintf "expected %s or %s, got %s" (typ_to_string TInt) (typ_to_string TString) (typ_to_string t1));
+      if t1 <> t2 then error (Printf.sprintf "expected %s, got %s" (typ_to_string t1) (typ_to_string t2));
+      t1
+    | Binop((Sub | Mul | Div | Rem), e1, e2) ->
       check e1 TInt tenv;
       check e2 TInt tenv;
       TInt
@@ -138,8 +145,8 @@ let typecheck_prog p =
   let rec check_instr i ret tenv = match i with
     | Print e ->
       let t = type_expr e tenv in
-      if t <> TInt && t <> TBool then
-        error (Printf.sprintf "expected %s or %s, got %s" (typ_to_string TInt) (typ_to_string TBool) (typ_to_string t))
+      if t <> TInt && t <> TBool && t <> TString then
+        error (Printf.sprintf "expected %s or %s or %s, got %s" (typ_to_string TInt) (typ_to_string TBool) (typ_to_string TString) (typ_to_string t))
     | Set(mem, e) ->
       begin
         let t1 = type_mem_access mem tenv in

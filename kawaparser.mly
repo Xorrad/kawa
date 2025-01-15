@@ -20,7 +20,8 @@
 // Types
 %token <int> INT
 %token <bool> BOOL
-%token TINT TBOOL TVOID
+%token <string> STRING
+%token TINT TBOOL TVOID TSTRING
 
 // Miscallaneous
 %token ASSIGN
@@ -82,6 +83,7 @@ arg_decl:
 typ:
 | TINT { TInt }
 | TBOOL { TBool }
+| TSTRING { TString }
 | id=IDENT { TClass(id) }
 | TVOID { TVoid }
 ;
@@ -102,6 +104,7 @@ meth_def:
 expression:
 | n=INT { Int(n) }
 | b=BOOL { Bool(b) }
+| s=STRING { String(s) }
 | THIS { This }
 | m=mem { Get(m) }
 | op=uop e=expression %prec UOP { Unop(op, e) }

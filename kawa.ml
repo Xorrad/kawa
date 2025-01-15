@@ -8,12 +8,14 @@ type typ =
   | TVoid
   | TInt
   | TBool
+  | TString
   | TClass of string
 
 let typ_to_string = function
   | TVoid -> "void"
   | TInt -> "int"
   | TBool -> "bool"
+  | TString -> "string"
   | TClass c -> c
 
 type unop =
@@ -42,6 +44,7 @@ type expr =
   (* Base arithmétique *)
   | Int    of int
   | Bool   of bool
+  | String of string
   | Unop   of unop * expr
   | Binop  of binop * expr * expr
   (* Accès à une variable ou un attribut *)

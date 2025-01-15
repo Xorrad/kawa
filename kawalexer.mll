@@ -26,6 +26,7 @@
         "int", TINT;
         "bool", TBOOL;
         "void", TVOID;
+        "string", TSTRING;
         "extends", EXTENDS;
 
         "final", FINAL;
@@ -73,6 +74,12 @@ rule token = parse
   
   | "==="  { SEQ }
   | "=/="  { SNEQ }
+
+  | "\"" [^ '\n']* "\"" { 
+      let full = Lexing.lexeme lexbuf in
+      let s = String.sub full 1 (String.length full - 2) in
+      STRING s 
+  }
 
   | number as n  { INT(int_of_string n) }
   | ident as id  { keyword_or_ident id }

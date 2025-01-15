@@ -3,6 +3,7 @@ open Kawa
 type value =
   | VInt  of int
   | VBool of bool
+  | VString of string
   | VObj  of obj
   | Null of typ
 and obj = {
@@ -18,6 +19,7 @@ let type_of_value v =
   match v with
   | VInt _ -> TInt
   | VBool _ -> TBool
+  | VString _ -> TString
   | VObj obj -> TClass obj.cls
   | Null t -> t
 
@@ -91,12 +93,16 @@ let exec_prog (p: program): unit =
     and evalb e = match eval e with
       | VBool b -> b
       | _ -> assert false
+    and evals e = match eval e with
+      | VString s -> s
+      | _ -> assert false
     and evalo e = match eval e with
       | VObj o -> o
       | _ -> assert false
     and struct_equality e1 e2 = match (eval e1, eval e2) with
       | VInt n1, VInt n2 -> n1 = n2
       | VBool b1, VBool b2 -> b1 = b2
+      | VString s1, VString s2 -> s1 = s2
       | VObj o1, VObj o2 ->
         if o1.cls = o2.cls then
           let exception NotEqual in
@@ -111,13 +117,22 @@ let exec_prog (p: program): unit =
       | _ -> failwith "invalid structural equality operation"
 
     and eval (e: expr): value = match e with
-      | Int n  -> VInt n
-      | Bool b  -> VBool b
+      | Int n -> VInt n
+      | Bool b -> VBool b
+      | String s -> VString s
 
       | Unop(Opp, e1) -> VInt (- evali e1)
       | Unop(Not, e1) -> VBool (not (evalb e1))
 
-      | Binop(Add, e1, e2) -> VInt (evali e1 + evali e2)
+      | Binop(Add, e1, e2) ->
+        begin
+          let v1 = eval e1 in
+          let v2 = eval e2 in
+          match v1, v2 with
+          | VString s1, VString s2 -> VString (s1 ^ s2)
+          | VInt i1, VInt i2 -> VInt (i1 + i2)
+          | _ -> failwith "invalid use of operator +"
+        end
       | Binop(Sub, e1, e2) -> VInt (evali e1 - evali e2)
       | Binop(Mul, e1, e2) -> VInt (evali e1 * evali e2)
       | Binop(Div, e1, e2) -> VInt (evali e1 / evali e2)
@@ -175,6 +190,7 @@ let exec_prog (p: program): unit =
           match eval e with
           | VInt n -> Printf.printf "%d\n" n
           | VBool b -> Printf.printf "%b\n" b
+          | VString s -> Printf.printf "%s\n" s
           | _ -> failwith "invalid type when calling print"
         end
       | Set(mem, e) ->
