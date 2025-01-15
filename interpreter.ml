@@ -4,7 +4,7 @@ type value =
   | VInt  of int
   | VBool of bool
   | VObj  of obj
-  | Null
+  | Null of typ
 and obj = {
   cls:    string;
   fields: (string, var) Hashtbl.t;
@@ -14,6 +14,15 @@ and var = {
   final: bool;
 }
 
+let type_of_value v =
+  match v with
+  | VInt _ -> TInt
+  | VBool _ -> TBool
+  | VObj obj -> TClass obj.cls
+  | Null t -> t
+
+let is_null v = match v with Null _ -> true | _ -> false
+
 exception Error of string
 exception Return of value
 
@@ -22,17 +31,30 @@ let exec_prog (p: program): unit =
 
   let init_vars vars lenv =
     List.fold_left (fun l var ->
-        Hashtbl.add lenv var.variable_name {value=Null; final=var.variable_final};
+        Hashtbl.add lenv var.variable_name {value=(Null var.variable_type); final=var.variable_final};
         match var.variable_value with
         | Some v -> Set (Var var.variable_name, v) :: l
         | None -> l
     ) [] vars
   in
-
   let find_var env (s: string) (message: string) =
     match Hashtbl.find_opt env s with
     | Some v -> v.value
     | None -> failwith message
+  in
+
+  let rec is_subclass class_name parent_name =
+    if class_name = parent_name then true
+    else
+      let c = List.find (fun c -> c.class_name = class_name) p.classes in
+      match c.parent with
+        | Some p -> is_subclass p parent_name
+        | None -> false
+    in
+  let is_type v t =
+    match type_of_value v with
+    | TClass cls -> ( match t with TClass s -> (is_subclass cls s) | _ -> false )
+    | vt -> vt = t
   in
 
   let rec eval_call f this args =
@@ -49,7 +71,7 @@ let exec_prog (p: program): unit =
               exec_seq (init_vars m.locals local_env) local_env;
               try
                 exec_seq m.code local_env;
-                Null
+                (Null TVoid)
               with Return e -> e
             end
           | None ->
@@ -142,6 +164,7 @@ let exec_prog (p: program): unit =
       | MethCall(e, s, args) ->
         let args = List.rev (List.fold_left (fun r e -> eval e :: r) [] args) in
         eval_call s (evalo e) args
+      | Instanceof(e, t) -> VBool (is_type (eval e) t)
 
       | _ -> failwith "case not implemented in eval" [@@ocaml.warning "-11"]
     in
@@ -162,7 +185,7 @@ let exec_prog (p: program): unit =
             begin
               match Hashtbl.find_opt lenv s with
               | Some var ->
-                if var.final && var.value != Null then failwith (Printf.sprintf "final variable %s cannot be modified" s)
+                if var.final && not (is_null var.value) then failwith (Printf.sprintf "final variable %s cannot be modified" s)
                 else var.value <- v
               | None -> Hashtbl.add lenv s {value=v; final=false}
             end
@@ -171,7 +194,7 @@ let exec_prog (p: program): unit =
               let obj = evalo e in
               match Hashtbl.find_opt obj.fields s with
               | Some var ->
-                if var.final && var.value != Null then failwith (Printf.sprintf "final field %s in class %s cannot be modified" s obj.cls)
+                if var.final && not (is_null var.value) then failwith (Printf.sprintf "final field %s in class %s cannot be modified" s obj.cls)
                 else var.value <- v
               | None -> Hashtbl.add obj.fields s {value=v; final=false}
             end

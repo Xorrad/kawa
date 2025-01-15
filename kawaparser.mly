@@ -6,7 +6,7 @@
 %}
 
 // Reserved keywords
-%token MAIN VAR ATTRIBUTE METHOD CLASS NEW THIS IF ELSE WHILE RETURN PRINT EXTENDS FINAL
+%token MAIN VAR ATTRIBUTE METHOD CLASS NEW THIS IF ELSE WHILE RETURN PRINT EXTENDS FINAL INSTANCEOF
 
 // Arithmetic operators
 %token SUB ADD MUL DIV MOD
@@ -33,7 +33,7 @@
 %left AND
 %nonassoc LT LE GT GE EQ NEQ SEQ SNEQ
 %left ADD SUB
-%left MUL DIV MOD
+%left MUL DIV MOD INSTANCEOF
 %nonassoc UOP
 %left DOT
 
@@ -106,6 +106,7 @@ expression:
 | m=mem { Get(m) }
 | op=uop e=expression %prec UOP { Unop(op, e) }
 | e1=expression op=bop e2=expression { Binop(op, e1, e2) }
+| e=expression INSTANCEOF t=typ { Instanceof(e, t) }
 | LPAR e=expression RPAR { e }
 | NEW id=IDENT { New(id) }
 | NEW id=IDENT LPAR args=separated_list(COMMA, expression) RPAR { NewCstr(id, args) }

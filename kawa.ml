@@ -53,6 +53,8 @@ type expr =
   | NewCstr  of string * expr list
   (* Appel de méthode *)
   | MethCall of expr * string * expr list
+  (* Test de type dynamique *)
+  | Instanceof  of expr * typ
 
 (* Accès mémoire : variable ou attribut d'un objet *)
 and mem_access =

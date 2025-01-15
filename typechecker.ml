@@ -74,31 +74,33 @@ let typecheck_prog p =
       end;
       TClass s
     | MethCall(e, method_name, args) ->
-      match type_expr e tenv with
-      | TClass class_name ->
-        let rec type_method class_name method_name =
-          (* 1. Check if the class is defined *)
-          (* 2. Check if class has method *)
-          (* 3. If not check recursively for parent classes *)
-          match List.find_opt (fun c -> c.class_name = class_name) p.classes with
-          | Some c ->
-            begin
-              match List.find_opt (fun m -> m.method_name = method_name) c.methods with
-              | Some m ->
-                List.iter2 (fun v e -> check e v.variable_type tenv) m.params args;
-                m.return
-              | None ->
-                begin
-                  match c.parent with
-                  | Some parent_name -> type_method parent_name method_name
-                  | None -> error (Printf.sprintf "undefined method %s in class %s" method_name class_name)
-                end
-            end
-          | None -> error (Printf.sprintf "undefined class %s" class_name)
-        in
-        type_method class_name method_name
-      | t -> error (Printf.sprintf "cannot call methods on %s" (typ_to_string t))
-
+      begin
+        match type_expr e tenv with
+        | TClass class_name ->
+          let rec type_method class_name method_name =
+            (* 1. Check if the class is defined *)
+            (* 2. Check if class has method *)
+            (* 3. If not check recursively for parent classes *)
+            match List.find_opt (fun c -> c.class_name = class_name) p.classes with
+            | Some c ->
+              begin
+                match List.find_opt (fun m -> m.method_name = method_name) c.methods with
+                | Some m ->
+                  List.iter2 (fun v e -> check e v.variable_type tenv) m.params args;
+                  m.return
+                | None ->
+                  begin
+                    match c.parent with
+                    | Some parent_name -> type_method parent_name method_name
+                    | None -> error (Printf.sprintf "undefined method %s in class %s" method_name class_name)
+                  end
+              end
+            | None -> error (Printf.sprintf "undefined class %s" class_name)
+          in
+          type_method class_name method_name
+        | t -> error (Printf.sprintf "cannot call methods on %s" (typ_to_string t))
+      end
+    | Instanceof(e, t) -> TBool
     | _ -> failwith "case not implemented in type_expr" [@@ocaml.warning "-11"]
 
   and type_mem_access m tenv = match m with

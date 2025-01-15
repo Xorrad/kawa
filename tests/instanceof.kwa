@@ -1,0 +1,30 @@
+var int a;
+var paire p;
+var triple t;
+var quadruple q;
+
+class paire {
+  attribute int x;
+}
+
+class triple extends paire {
+  attribute int y;
+}
+
+class quadruple extends triple {
+  attribute int z;
+}
+
+main {
+  print(a instanceof int);
+  print(a instanceof bool);
+  print(p instanceof paire);
+  print(p instanceof triple);
+  print(t instanceof paire);
+  print(t instanceof triple);
+  print(t instanceof quadruple);
+  print(q instanceof paire);
+  print(q instanceof triple);
+  print(q instanceof quadruple);
+  // true, false, true, false, true, true, false, true, true, true
+}
