@@ -43,12 +43,12 @@
 %%
 
 program:
-| globals=list(var_decl) classes=list(class_def) MAIN BEGIN main=list(instruction) END EOF
+| globals=vars_decl classes=list(class_def) MAIN BEGIN main=list(instruction) END EOF
     { {globals=globals; classes=classes; main} }
 ;
 
 class_def:
-| CLASS id=IDENT parent=opt_extends BEGIN attr=list(attr_decl) meth=list(meth_def) END
+| CLASS id=IDENT parent=opt_extends BEGIN attr=attrs_decl meth=list(meth_def) END
     { {class_name=id; attributes=attr; methods=meth; parent=parent} }
 ;
 
@@ -57,16 +57,26 @@ opt_extends:
 | EXTENDS parent=IDENT { Some parent }
 ;
 
-typed_ident:
-| final=opt_final t=typ id=IDENT { {variable_name=id; variable_type=t; variable_value=None; variable_final=final} }
-;
-
 var_decl:
-| final=opt_final VAR t=typ id=IDENT v=opt_var_value SEMI { {variable_name=id; variable_type=t; variable_value=v; variable_final=final} }
+| id=IDENT v=opt_var_value { {variable_name=id; variable_type=TVoid; variable_value=v; variable_final=false} }
 ;
 
-attr_decl:
-| final=opt_final ATTRIBUTE t=typ id=IDENT v=opt_var_value SEMI { {variable_name=id; variable_type=t; variable_value=v; variable_final=final} }
+vars_decl:
+| final=opt_final VAR t=typ vars=separated_list(COMMA, var_decl) SEMI vars2=vars_decl {
+        (List.map (fun v -> {variable_name=v.variable_name; variable_type=t; variable_value=v.variable_value; variable_final=final}) vars) @ vars2
+    }
+| { [] }
+;
+
+attrs_decl:
+| final=opt_final ATTRIBUTE t=typ vars=separated_list(COMMA, var_decl) SEMI attrs=attrs_decl {
+        (List.map (fun v -> {variable_name=v.variable_name; variable_type=t; variable_value=v.variable_value; variable_final=final}) vars) @ attrs
+    }
+| { [] }
+;
+
+arg_decl:
+| final=opt_final t=typ id=IDENT { {variable_name=id; variable_type=t; variable_value=None; variable_final=final} }
 ;
 
 typ:
@@ -85,7 +95,7 @@ opt_var_value:
 | ASSIGN e=expression { Some e}
 
 meth_def:
-| METHOD t=typ id=IDENT LPAR args=separated_list(COMMA, typed_ident) RPAR BEGIN var=list(var_decl) instr=list(instruction) END
+| METHOD t=typ id=IDENT LPAR args=separated_list(COMMA, arg_decl) RPAR BEGIN var=vars_decl instr=list(instruction) END
     { {method_name=id; code=instr; params=args; locals=var; return=t} }
 ;
 

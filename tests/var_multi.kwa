@@ -1,0 +1,15 @@
+var int x = 10, y, z = 5;
+var point p1 = new point, p2 = new point;
+
+class point {
+  attribute int x = 9, y = 7;
+}
+
+main {
+  y = 2;
+  
+  print(x);
+  print(y);
+  print(p1.x);
+  print(p1.y);
+}
