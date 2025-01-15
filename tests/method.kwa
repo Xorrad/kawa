@@ -17,6 +17,7 @@ class point {
 main {
   p = new point(2, 1);
   p.x = 3 + p.x;
-  print(48 + p.somme());
+  println("got", "expected");
+  println(48 + p.somme(), 54);
   // affiche 54
 }

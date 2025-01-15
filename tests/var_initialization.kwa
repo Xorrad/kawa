@@ -11,7 +11,8 @@ class point {
 }
 
 main {
-  print(x);
-  print(p1.x);
-  print(p2.x);
+  println("got", "expected");
+  println(x, 10);
+  println(p1.x, 2);
+  println(p2.x, 3);
 }

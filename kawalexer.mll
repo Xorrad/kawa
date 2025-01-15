@@ -31,6 +31,7 @@
 
         "final", FINAL;
         "instanceof", INSTANCEOF;
+        "println", PRINTLN;
       ] ;
     fun s ->
       try  Hashtbl.find h s
@@ -75,7 +76,7 @@ rule token = parse
   | "==="  { SEQ }
   | "=/="  { SNEQ }
 
-  | "\"" [^ '\n']* "\"" { 
+  | "\"" [^ '\n' '"']* "\"" { 
       let full = Lexing.lexeme lexbuf in
       let s = String.sub full 1 (String.length full - 2) in
       STRING s 

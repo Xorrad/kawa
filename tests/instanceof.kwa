@@ -16,15 +16,16 @@ class quadruple extends triple {
 }
 
 main {
-  print(a instanceof int);
-  print(a instanceof bool);
-  print(p instanceof paire);
-  print(p instanceof triple);
-  print(t instanceof paire);
-  print(t instanceof triple);
-  print(t instanceof quadruple);
-  print(q instanceof paire);
-  print(q instanceof triple);
-  print(q instanceof quadruple);
+  println("got ", "expected");
+  println(a instanceof int, true);
+  println(a instanceof bool, false);
+  println(p instanceof paire, true);
+  println(p instanceof triple, false);
+  println(t instanceof paire, true);
+  println(t instanceof triple, true);
+  println(t instanceof quadruple, false);
+  println(q instanceof paire, true);
+  println(q instanceof triple, true);
+  println(q instanceof quadruple, true);
   // true, false, true, false, true, true, false, true, true, true
 }

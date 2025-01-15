@@ -1,0 +1,9 @@
+var int i = 10;
+var bool b = false;
+var string s = "Hello World";
+
+main {
+  print("a");
+  print("b");
+  println(i, b, s, "!!!");
+}

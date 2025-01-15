@@ -10,7 +10,7 @@
 - [Difficultés](#difficultes)
 
 ## Introduction
-Projet du cours de Compilation pour l'année 2024-2025 sur un langage orienté objet fictif nommé **Kawa**
+Projet du cours de Compilation pour l'année 2024-2025 - sur un langage orienté objet fictif nommé **Kawa** -
 réalisé par:
 - Aymeric Emond <<aymeric.emond@etu-upsaclay.fr>>
 
@@ -45,9 +45,18 @@ var int x = 1, y = 2;
 ### Test de type
 Ajout d'un opérateur binaire **instanceof** testant le type dynamique d'un objet.
 
+### Chaînes de caractères
+Ajout d'un type `string` pour représenter et afficher des chaines de caractères.  
+L'opérateur binaire `+` est également compatible pour concaténer un chaîne à une autre.
 
-
-
+### Amélioration de la fonction print
+La fonction `print` a été améliorée pour pouvoir afficher plusieurs valeurs simultanéments de types `int`, `bool` et `string`.
+```
+a = 10;
+print("hello", "world", a);
+// affiche: "hello world 10"
+```
+Pour effectuer automatiquement un retour à la ligne, on peut appeler la primitive `println(...);`
 
 ## Difficultés
 La principale difficulté rencontrée était de se régler les conflits lors de l'analyse grammaticale.  

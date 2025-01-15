@@ -6,7 +6,7 @@
 %}
 
 // Reserved keywords
-%token MAIN VAR ATTRIBUTE METHOD CLASS NEW THIS IF ELSE WHILE RETURN PRINT EXTENDS FINAL INSTANCEOF
+%token MAIN VAR ATTRIBUTE METHOD CLASS NEW THIS IF ELSE WHILE RETURN PRINT EXTENDS FINAL INSTANCEOF PRINTLN
 
 // Arithmetic operators
 %token SUB ADD MUL DIV MOD
@@ -122,7 +122,8 @@ mem:
 ;
 
 instruction:
-| PRINT LPAR e=expression RPAR SEMI { Print(e) }
+| PRINT LPAR args=separated_list(COMMA, expression) RPAR SEMI { Print(args, false) }
+| PRINTLN LPAR args=separated_list(COMMA, expression) RPAR SEMI { Print(args, true) }
 | m=mem ASSIGN e=expression SEMI { Set(m, e) }
 | IF LPAR e1=expression RPAR BEGIN i1=list(instruction) END ELSE BEGIN i2=list(instruction) END
     { If(e1, i1, i2) }

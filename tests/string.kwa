@@ -1,7 +1,10 @@
 var string s = "Hello World";
+var string s2 = "Hello " + " World";
 
 main {
   print("s = ");
-  print(s);
-  print(s + "!");
+  println(s);
+  println(s + "!");
+  println("a", "b", "c");
+  println(s2);
 }

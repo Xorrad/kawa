@@ -2,7 +2,7 @@ final var int a;
 
 main {
   a = 10;
-  print(a);
+  println("expected: final variable a cannot be modified");
   a = a + 20;
   //failure: final variable a cannot be modified
 }

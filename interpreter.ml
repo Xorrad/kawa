@@ -95,7 +95,7 @@ let exec_prog (p: program): unit =
       | _ -> assert false
     and evals e = match eval e with
       | VString s -> s
-      | _ -> assert false
+      | _ -> assert false [@@ocaml.warning "-26"]
     and evalo e = match eval e with
       | VObj o -> o
       | _ -> assert false
@@ -185,14 +185,15 @@ let exec_prog (p: program): unit =
     in
   
     let rec exec (i: instr): unit = match i with
-      | Print e ->
-        begin
+      | Print(l, newline) ->
+        List.iter (fun e ->
           match eval e with
-          | VInt n -> Printf.printf "%d\n" n
-          | VBool b -> Printf.printf "%b\n" b
-          | VString s -> Printf.printf "%s\n" s
+          | VInt n -> Printf.printf "%d " n
+          | VBool b -> Printf.printf "%b " b
+          | VString s -> Printf.printf "%s " s
           | _ -> failwith "invalid type when calling print"
-        end
+        ) l;
+        if newline then Printf.printf "\n";
       | Set(mem, e) ->
         let v = eval e in
         begin

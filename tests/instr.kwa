@@ -11,5 +11,6 @@ main {
     a = a*a;
     n = n/2;
   }
-  print(acc);
+  println("got", "expected");
+  println(acc, 512);
 }

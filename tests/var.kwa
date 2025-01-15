@@ -6,5 +6,6 @@ main {
   y = 6;
   x = x+2;
   y = y*(x+4);
-  print(y);
+  println("got", "expected");
+  println(y, 42);
 }

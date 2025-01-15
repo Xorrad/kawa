@@ -143,10 +143,12 @@ let typecheck_prog p =
   in
 
   let rec check_instr i ret tenv = match i with
-    | Print e ->
-      let t = type_expr e tenv in
-      if t <> TInt && t <> TBool && t <> TString then
-        error (Printf.sprintf "expected %s or %s or %s, got %s" (typ_to_string TInt) (typ_to_string TBool) (typ_to_string TString) (typ_to_string t))
+    | Print(l, newline) ->
+      List.iter (fun e ->
+        let t = type_expr e tenv in
+        if t <> TInt && t <> TBool && t <> TString then
+          error (Printf.sprintf "expected %s or %s or %s, got %s" (typ_to_string TInt) (typ_to_string TBool) (typ_to_string TString) (typ_to_string t))
+      ) l
     | Set(mem, e) ->
       begin
         let t1 = type_mem_access mem tenv in

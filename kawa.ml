@@ -66,8 +66,8 @@ and mem_access =
 
 (* Instructions *)
 type instr =
-  (* Affichage d'un entier *)
-  | Print  of expr
+  (* Affichage de plusieurs expressions avec nouvelle ligne ou non*)
+  | Print  of expr list * bool
   (* Écriture dans une variable ou un attribut *)
   | Set    of mem_access * expr
   (* Structures de contrôle usuelles *)

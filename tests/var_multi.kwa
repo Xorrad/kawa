@@ -8,8 +8,9 @@ class point {
 main {
   y = 2;
   
-  print(x);
-  print(y);
-  print(p1.x);
-  print(p1.y);
+  println("got", "expected");
+  println(x, 10);
+  println(y, 2);
+  println(p1.x, 9);
+  println(p1.y, 7);
 }
