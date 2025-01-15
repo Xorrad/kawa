@@ -10,17 +10,17 @@ module Env = Map.Make(String)
 type tenv = typ Env.t
 
 let add_env l tenv =
-  List.fold_left (fun env (x, t) -> Env.add x t env) tenv l
+  List.fold_left (fun env v -> Env.add v.variable_name v.variable_type env) tenv l
 
 let typecheck_prog p =
   let tenv = add_env p.globals Env.empty in
 
-  let rec check_subclass class_name parent_name =
+  let rec check_subclass original_class class_name parent_name =
     if class_name <> parent_name then
       let c = List.find (fun c -> c.class_name = class_name) p.classes in
       match c.parent with
-        | Some p -> check_subclass class_name p
-        | None -> error (Printf.sprintf "%s is not a subclass of %s" class_name parent_name)
+        | Some p -> check_subclass original_class p parent_name
+        | None -> error (Printf.sprintf "%s is not a subclass of %s" original_class parent_name)
   in
 
   let rec check e typ tenv =
@@ -47,7 +47,7 @@ let typecheck_prog p =
       check e2 TInt tenv;
       TBool
     | Binop((Eq | Neq), e1, e2) ->
-      check e2 (type_expr e tenv) tenv;
+      check e1 (type_expr e2 tenv) tenv;
       TBool
     | Binop((And | Or), e1, e2) ->
       check e1 TBool tenv;
@@ -66,8 +66,8 @@ let typecheck_prog p =
         match List.find_opt (fun c -> c.class_name = s) p.classes with
         | Some c ->
           begin
-            match List.find_opt (fun m -> m.method_name = s) c.methods with
-              | Some m -> List.iter2 (fun (s, t) e -> check e t tenv) m.params args
+            match List.find_opt (fun m -> m.method_name = "constructor") c.methods with
+              | Some m -> List.iter2 (fun v e -> check e v.variable_type tenv) m.params args
               | None -> error (Printf.sprintf "undefined constructor for class %s" s);
           end
         | None -> error (Printf.sprintf "undefined class %s" s);
@@ -85,7 +85,7 @@ let typecheck_prog p =
             begin
               match List.find_opt (fun m -> m.method_name = method_name) c.methods with
               | Some m ->
-                List.iter2 (fun (s, t) e -> check e t tenv) m.params args;
+                List.iter2 (fun v e -> check e v.variable_type tenv) m.params args;
                 m.return
               | None ->
                 begin
@@ -99,12 +99,12 @@ let typecheck_prog p =
         type_method class_name method_name
       | t -> error (Printf.sprintf "cannot call methods on %s" (typ_to_string t))
 
-    | _ -> failwith "case not implemented in type_expr"
+    | _ -> failwith "case not implemented in type_expr" [@@ocaml.warning "-11"]
 
   and type_mem_access m tenv = match m with
     | Var s ->
       begin
-        try Hashtbl.find tenv s
+        try Env.find s tenv
         with Not_found -> error (Printf.sprintf "undefined variable %s" s)
       end
     | Field(e, s) ->
@@ -115,8 +115,8 @@ let typecheck_prog p =
         match List.find_opt (fun c -> c.class_name = class_name) p.classes with
         | Some c ->
           begin
-            match List.find_opt (fun (a,t) -> a = s) c.attributes with
-            | Some (s, t) -> t
+            match List.find_opt (fun a -> a.variable_name = s) c.attributes with
+            | Some a -> a.variable_type
             | None ->
               begin
                 match c.parent with
@@ -130,7 +130,7 @@ let typecheck_prog p =
       | TClass class_name -> type_attribute class_name s
       | t -> error (Printf.sprintf "%s don't have attributes" (typ_to_string t))
       
-    | _ -> failwith "case not implemented in type_mem_access"
+    | _ -> failwith "case not implemented in type_mem_access" [@@ocaml.warning "-11"]
   in
 
   let rec check_instr i ret tenv = match i with
@@ -140,7 +140,7 @@ let typecheck_prog p =
         let t1 = type_mem_access mem tenv in
         let t2 = type_expr e tenv in
         match t1, t2 with
-        | TClass s1, TClass s2 -> check_subclass s1 s2
+        | TClass s1, TClass s2 -> check_subclass s2 s2 s1
         | t1, t2 -> if t1 <> t2 then type_error t1 t2
       end
     | If(pred, seq1, seq2) ->
@@ -153,10 +153,10 @@ let typecheck_prog p =
     | Return(e) -> ()
     | Expr e -> check e TVoid tenv
 
-    | _ -> failwith "case not implemented in check_instr"
+    | _ -> failwith "case not implemented in check_instr" [@@ocaml.warning "-11"]
 
   and check_seq s ret tenv =
     List.iter (fun i -> check_instr i ret tenv) s
-  in
+  in 
 
   check_seq p.main TVoid tenv
