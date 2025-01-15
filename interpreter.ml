@@ -20,25 +20,26 @@ let exec_prog (p: program): unit =
   let rec eval_call f this args =
     let rec eval_method class_name =
       match List.find_opt (fun cls -> cls.class_name = class_name) p.classes with
-      | Some c -> begin
-        match List.find_opt (fun m -> m.method_name = f) c.methods with
-        | Some m ->
-          begin
-            let local_env = Hashtbl.copy env in
-            Hashtbl.add local_env "this" (VObj this);
-            List.iter2 (fun (s, t) v -> Hashtbl.add local_env s v) m.params args;
-            try
-              exec_seq m.code local_env;
-              Null
-            with Return e -> e
+      | Some c ->
+        begin
+          match List.find_opt (fun m -> m.method_name = f) c.methods with
+          | Some m ->
+            begin
+              let local_env = Hashtbl.copy env in
+              Hashtbl.add local_env "this" (VObj this);
+              List.iter2 (fun (s, t) v -> Hashtbl.add local_env s v) m.params args;
+              try
+                exec_seq m.code local_env;
+                Null
+              with Return e -> e
+            end
+          | None ->
+            begin
+              match c.parent with
+              | Some p -> eval_method p
+              | None -> failwith (Printf.sprintf "undefined method %s in class %s" f class_name)
+            end
           end
-        | None ->
-          begin
-            match c.parent with
-            | Some x -> eval_method x
-            | None -> failwith (Printf.sprintf "undefined method %s in class %s" f class_name)
-          end
-        end
       | None -> failwith (Printf.sprintf "undefined class %s" class_name) in
     eval_method this.cls
 
@@ -90,7 +91,7 @@ let exec_prog (p: program): unit =
           | Some c ->
             let class_env =
               match c.parent with
-              | Some x -> (evalo (New x)).fields
+              | Some p -> (evalo (New p)).fields
               | None -> Hashtbl.create (List.length c.attributes)
             in
             List.iter (fun (a, v) -> Hashtbl.add class_env a Null) c.attributes;
