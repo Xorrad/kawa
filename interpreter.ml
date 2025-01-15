@@ -19,7 +19,15 @@ exception Return of value
 
 let exec_prog (p: program): unit =
   let env = Hashtbl.create 16 in
-  List.iter (fun v -> Hashtbl.add env v.variable_name {value=Null; final=v.variable_final}) p.globals;
+
+  let init_vars vars lenv =
+    List.fold_left (fun l var ->
+        Hashtbl.add lenv var.variable_name {value=Null; final=var.variable_final};
+        match var.variable_value with
+        | Some v -> Set (Var var.variable_name, v) :: l
+        | None -> l
+    ) [] vars
+  in
 
   let find_var env (s: string) (message: string) =
     match Hashtbl.find_opt env s with
@@ -38,6 +46,7 @@ let exec_prog (p: program): unit =
               let local_env = Hashtbl.copy env in
               Hashtbl.add local_env "this" {value=(VObj this); final=true};
               List.iter2 (fun v1 v2 -> Hashtbl.add local_env v1.variable_name {value=v2; final=v1.variable_final}) m.params args;
+              exec_seq (init_vars m.locals local_env) local_env;
               try
                 exec_seq m.code local_env;
                 Null
@@ -121,7 +130,7 @@ let exec_prog (p: program): unit =
               | Some p -> (evalo (New p)).fields
               | None -> Hashtbl.create (List.length c.attributes)
             in
-            List.iter (fun a -> Hashtbl.add class_env a.variable_name {value=Null; final=a.variable_final}) c.attributes;
+            exec_seq (init_vars c.attributes class_env) class_env;
             VObj { cls = s; fields = class_env }
           | None -> failwith (Printf.sprintf "undefined class %s" s);
         end
@@ -191,4 +200,5 @@ let exec_prog (p: program): unit =
     exec_seq s
   in
   
+  exec_seq (init_vars p.globals env) env;
   exec_seq p.main env

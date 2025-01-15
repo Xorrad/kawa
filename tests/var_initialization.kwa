@@ -1,0 +1,17 @@
+var int x = 10;
+var point p1 = new point;
+var point p2 = new point(3);
+
+class point {
+  attribute int x = 2;
+
+  method void constructor(int x) {
+    this.x = x;
+  }
+}
+
+main {
+  print(x);
+  print(p1.x);
+  print(p2.x);
+}

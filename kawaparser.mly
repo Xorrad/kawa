@@ -62,11 +62,11 @@ typed_ident:
 ;
 
 var_decl:
-| final=opt_final VAR t=typ id=IDENT SEMI { {variable_name=id; variable_type=t; variable_value=None; variable_final=final} }
+| final=opt_final VAR t=typ id=IDENT v=opt_var_value SEMI { {variable_name=id; variable_type=t; variable_value=v; variable_final=final} }
 ;
 
 attr_decl:
-| final=opt_final ATTRIBUTE t=typ id=IDENT SEMI { {variable_name=id; variable_type=t; variable_value=None; variable_final=final} }
+| final=opt_final ATTRIBUTE t=typ id=IDENT v=opt_var_value SEMI { {variable_name=id; variable_type=t; variable_value=v; variable_final=final} }
 ;
 
 typ:
@@ -79,6 +79,10 @@ typ:
 opt_final:
 | /* empty */ { false }
 | FINAL { true }
+
+opt_var_value:
+| /* empty */ { None }
+| ASSIGN e=expression { Some e}
 
 meth_def:
 | METHOD t=typ id=IDENT LPAR args=separated_list(COMMA, typed_ident) RPAR BEGIN var=list(var_decl) instr=list(instruction) END

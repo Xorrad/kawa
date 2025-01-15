@@ -2,6 +2,7 @@ final var point a;
 
 class point {
   final attribute int x;
+  final attribute int y;
 }
 
 main {
